@@ -29,6 +29,13 @@ contract EscrowRelease {
     }
 
     function release() external {
-        // Implement this function.
+        if (msg.sender != buyer && msg.sender != arbiter) revert NotAuthorized();
+        if (status != Status.Funded) revert BadStatus();
+        uint256 payment = amount;
+        status = Status.Released;
+        amount = 0;
+        (bool success, ) = seller.call{value: payment}("");
+        if (!success) rever TransferFailed();
+        emit Released(seller, payment);
     }
 }
